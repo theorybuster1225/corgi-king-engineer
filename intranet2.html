@@ -9,20 +9,31 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8; /* Sterile, light blue-gray */
+            background-color: #f0f4f8;
         }
         .lumon-blue-text { color: #0d6087; }
         .lumon-teal-text { color: #008080; }
         .lumon-card { background-color: #ffffff; }
-        .lumon-header { background-color: #1f2937; } /* Tailwind gray-800 */
-        .lumon-accent-border { border-color: #e5e7eb; } /* Tailwind gray-200 */
+        .lumon-header-bg { background-color: #e0e6ec; } /* A color close to the banner's bg */
+        .lumon-accent-border { border-color: #e5e7eb; }
     </style>
 </head>
 <body class="min-h-screen">
 
-    <header class="lumon-header shadow-md">
-        <div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
-            <img src="lumon_logo_banner.png" alt="Lumon Industries" class="w-12 block mx-auto">
+    <header class="lumon-header-bg shadow-md">
+        <div class="max-w-7xl mx-auto">
+            <div
+                class="h-28" 
+                style="
+                  background-image: url('lumon_logo_banner.jpg');
+                  background-repeat: no-repeat;
+                  background-position: right center;
+                  background-size: contain;
+                "
+                role="img"
+                aria-label="Lumon Industries Banner with text: Marshmallows are for team players."
+            >
+                </div>
         </div>
     </header>
 
