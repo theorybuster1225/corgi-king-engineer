@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumon Industries - Employee Protocol</title>
+    <script src="https://cdn.tailwindcss.com/tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            /* Lumon-inspired background: very light, almost sterile */
+            background-color: #f0f4f8; /* A very light blue-gray */
+        }
+
+        .lumon-card {
+            /* A common Lumon blue, good for accents or text */
+            --lumon-blue: #0d6087; /* Tailwind sky-800 is close: #075985 */
+            /* A common Lumon teal/green */
+            --lumon-teal: #008080; /* Tailwind teal-600 is #0d9488 */
+            /* A lighter, sterile background for the card */
+            --lumon-card-bg: #ffffff;
+            /* A darker text color for contrast on light bg */
+            --lumon-text-dark: #1f2937; /* Tailwind gray-800 */
+            /* A lighter text color for use on dark bg */
+            --lumon-text-light: #f3f4f6; /* Tailwind gray-100 */
+        }
+
+        /* Optional: Add a subtle animation to elements if desired */
+        .fade-in {
+            animation: fadeInAnimation 0.8s ease-in forwards;
+        }
+
+        @keyframes fadeInAnimation {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="lumon-card w-full max-w-lg bg-white shadow-2xl overflow-hidden fade-in">
+        <div class="bg-black">
+            <img src="lumon_logo.jpg" alt="Lumon Industries Logo Banner" class="w-full h-auto">
+        </div>
+
+        <div class="p-8 sm:p-10 md:p-12">
+            
+            <p class="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-8 tracking-wider uppercase">
+                Employee Data Archive
+            </p>
+
+            <div class="text-left mb-6">
+                <p class="text-sm font-medium text-sky-700 uppercase tracking-wider mb-1">Name</p>
+                <h2 class="text-3xl sm:text-4xl font-semibold text-gray-800" id="employeeName">
+                    Brandon B.
+                </h2>
+            </div>
+
+            <div class="text-left">
+                <p class="text-sm font-medium text-sky-700 uppercase tracking-wider mb-1">Department</p>
+                <h3 class="text-2xl sm:text-3xl font-medium text-gray-700" id="employeeDepartment">
+                    Optics & Design
+                </h3>
+            </div>
+
+            <hr class="my-8 border-gray-200">
+
+            <p class="text-xs text-gray-400 text-center">
+                This information is property of Lumon Industries. Unauthorized access is prohibited.
+            </p>
+
+        </div>
+
+        <div class="bg-gray-800 px-6 py-3 text-center">
+            <p class="text-xs text-gray-400">
+                Compliance Protocol 7.3 | &copy; <span id="currentYear"></span> Lumon Industries
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Set the current year in the footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // --- EDITED SECTION: Automatic Redirect to Intranet Hub ---
+        // This code will wait 5 seconds, then redirect the user.
+        setTimeout(function() {
+            // It will look for a file named 'intranet.html' in the same directory.
+            window.location.href = 'intranet.html';
+        }, 5000); // 5000 milliseconds = 5 seconds
+
+        // --- How to use this template ---
+        // 1. Save this file as an .html file (e.g., lumon_profile.html).
+        // 2. IMPORTANT: Upload your logo image (e.g., 'lumon_logo.jpg') to the same
+        //    directory as this HTML file on your web host.
+        // 3. Customize the content for `employeeName` and `employeeDepartment`.
+        // 4. Host this HTML file (and the logo) on a web server.
+        // 5. Program your NFC tags with the public URL of the hosted HTML file.
+    </script>
+
+</body>
+</html>
