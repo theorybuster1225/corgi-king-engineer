@@ -13,16 +13,6 @@
             -moz-osx-font-smoothing: grayscale;
             /* Lumon-inspired background: very light, almost sterile */
             background-color: #f0f4f8; /* A very light blue-gray */
-            /* You could also use a subtle pattern or gradient here.
-               For example, a faint diagonal line pattern:
-               background-image: repeating-linear-gradient(
-                45deg,
-                #e5e7eb 0,
-                #e5e7eb 1px,
-                transparent 1px,
-                transparent 10px
-               );
-            */
         }
 
         .lumon-card {
@@ -53,42 +43,40 @@
                 transform: translateY(0);
             }
         }
-
-        /* For the distinctive Lumon segmented circle, if you ever want to add it as a logo.
-           This is a placeholder for a more complex SVG or series of divs.
-        .lumon-logo-segment {
-            border-left: 20px solid var(--lumon-blue);
-            border-top-left-radius: 100px;
-            border-bottom-left-radius: 100px;
-            height: 100px;
-            width: 50px;
-        }
-        */
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen">
+<body class="flex items-center justify-center min-h-screen p-4">
 
     <div class="lumon-card w-full max-w-lg bg-white shadow-2xl overflow-hidden fade-in">
-        <div class="bg-sky-800 p-6 sm:p-8">
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-100 text-center tracking-wider">
-                LUMON INDUSTRIES
-            </h1>
-            <p class="text-xs text-sky-200 text-center tracking-widest mt-1">EMPLOYEE DATA ARCHIVE</p>
+        <!-- Header Section - Banner Logo -->
+        <div class="bg-black">
+            <!--
+              LUMON LOGO BANNER
+              NOTE: For this to work, upload your logo file (e.g., 'lumon_logo.jpg')
+              to the same directory as this HTML file on your web host (like GitHub Pages).
+            -->
+            <img src="lumon_logo.jpg" alt="Lumon Industries Logo Banner" class="w-full h-auto">
         </div>
 
-        <div class="p-8 sm:p-10 md:p-12 text-left">
-            <div class="mb-6">
+        <!-- Information Section -->
+        <div class="p-8 sm:p-10 md:p-12">
+            
+            <p class="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-8 tracking-wider uppercase">
+                Employee Data Archive
+            </p>
+
+            <div class="text-left mb-6">
                 <p class="text-sm font-medium text-sky-700 uppercase tracking-wider mb-1">Name</p>
                 <h2 class="text-3xl sm:text-4xl font-semibold text-gray-800" id="employeeName">
                     Elise B.
-                    </h2>
+                </h2>
             </div>
 
-            <div>
+            <div class="text-left">
                 <p class="text-sm font-medium text-sky-700 uppercase tracking-wider mb-1">Department</p>
                 <h3 class="text-2xl sm:text-3xl font-medium text-gray-700" id="employeeDepartment">
                     Macrodata Refinement
-                    </h3>
+                </h3>
             </div>
 
             <hr class="my-8 border-gray-200">
@@ -99,6 +87,7 @@
 
         </div>
 
+        <!-- Footer -->
         <div class="bg-gray-800 px-6 py-3 text-center">
             <p class="text-xs text-gray-400">
                 Compliance Protocol 7.3 | &copy; <span id="currentYear"></span> Lumon Industries
@@ -108,24 +97,15 @@
 
     <script>
         // Set the current year in the footer
-        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        document.getElementById('currentYear').textContent = new D ate().getFullYear();
 
         // --- How to use this template ---
         // 1. Save this file as an .html file (e.g., lumon_profile.html).
-        // 2. Customize the content:
-        //    - Update the text content for:
-        //        - `employeeName` (e.g., "Helly R.", "Irving B.")
-        //        - `employeeDepartment` (e.g., "Optics and Design", "Wellness")
-        // 3. Host this HTML file on a web server (e.g., GitHub Pages, Netlify, your company's server).
-        // 4. Get the public URL of the hosted HTML file.
-        // 5. Program your NFC tags with this URL using an NFC programming app.
-
-        // --- For multiple employees ---
-        // Create a separate HTML file for each employee by duplicating and modifying this template.
-        // Or, for a more advanced setup, you could use URL parameters to dynamically populate
-        // the name and department using JavaScript if you host this on a platform that allows
-        // for more complex client-side scripting or have a simple backend.
-        // For pure static hosting (like GitHub Pages), separate files are the most straightforward.
+        // 2. IMPORTANT: Upload your logo image (e.g., 'lumon_logo.jpg') to the same
+        //    directory as this HTML file on your web host.
+        // 3. Customize the content for `employeeName` and `employeeDepartment`.
+        // 4. Host this HTML file (and the logo) on a web server.
+        // 5. Program your NFC tags with the public URL of the hosted HTML file.
     </script>
 
 </body>
