@@ -82,12 +82,10 @@
 
     </main>
 
-    <!-- EDITED SCRIPT SECTION -->
     <script type="module">
-        // Import the new, local firebase config
-        import { firebaseConfig } from './firebase-config.js';
+        // EDITED: Using an absolute path to the config file for GitHub Pages
+        import { firebaseConfig } from '/corgi-king-engineer/firebase-config.js';
 
-        // Import the functions you need from the Firebase SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -160,7 +158,6 @@
             });
 
             try {
-                // The public path is now hardcoded for simplicity
                 const docRef = await addDoc(collection(db, `wellnessSubmissions`), submissionData);
                 console.log("Document written with ID: ", docRef.id);
                 questionnaireSection.classList.add('hidden');
