@@ -83,8 +83,8 @@
     </main>
 
     <script type="module">
-        // EDITED: Using an absolute path to the config file for GitHub Pages
-        import { firebaseConfig } from 'https://github.com/theorybuster1225/corgi-king-engineer/firebase-config.js';
+        // EDITED: Using a relative path, which is the standard for files in the same directory.
+        import { firebaseConfig } from './firebase-config.js';
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
