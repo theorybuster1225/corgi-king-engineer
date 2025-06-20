@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumon - The Words of Kier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; }
+        .lumon-card { background-color: #ffffff; border: 1px solid #e5e7eb; }
+        .nav-button { background-color: #4b5563; color: #ffffff; padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight: 600; transition: background-color 0.2s; border: 2px solid transparent; }
+        .nav-button:hover { background-color: #6b7280; }
+        .like-button { background-color: #d1fae5; color: #065f46; border: 2px solid #6ee7b7; }
+        .like-button.voted { background-color: #10b981; color: #ffffff; cursor: not-allowed; }
+    </style>
+</head>
+<body class="py-8 sm:py-12">
+
+    <main class="max-w-2xl mx-auto px-4 space-y-6">
+
+        <section class="lumon-card p-6 sm:p-8 rounded-lg shadow-sm text-center">
+            <h1 class="text-2xl font-bold text-gray-800">The Founder's Handbook</h1>
+            <p class="text-gray-600 mt-2">Meditate on the words of Kier. Let them be your comfort and your guide.</p>
+        </section>
+
+        <section class="lumon-card p-6 sm:p-8 rounded-lg shadow-sm">
+            <div id="quote-display" class="min-h-[200px] flex flex-col justify-center items-center">
+                <blockquote id="quote-text" class="text-xl sm:text-2xl text-center italic text-gray-700"></blockquote>
+                <p class="mt-4 font-semibold text-gray-800">— Kier Eagan</p>
+            </div>
+        </section>
+
+        <section class="flex justify-between items-center">
+            <button id="prev-quote" class="nav-button">&larr; Previous</button>
+            <button id="like-button" class="nav-button like-button">Approve of this Wisdom</button>
+            <button id="next-quote" class="nav-button">Next &rarr;</button>
+        </section>
+        
+        <div class="text-center pt-4">
+             <a href="intranet.html" class="text-gray-500 hover:text-gray-800 font-semibold text-sm">Return to Intranet</a>
+        </div>
+
+    </main>
+
+    <script type="module">
+        import { firebaseConfig } from './firebase-config.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const quotes = [
+            "And all in Lumon's care shall revel in the bounty of the incentives spur.",
+            "Come now, children of my industry, and know the children of my blood.",
+            "I walked into the cave of my own mind, and there I tamed them. Should you tame the tempers as I did mine, then the world shall become but your appendage.",
+            "Keep a merry humor ever in your heart.",
+            "Let not weakness live in your veins. Cherished workers, drown it inside you. Rise up from your deathbed and sally forth, more perfect for the struggle.",
+            "Render not my creation in miniature.",
+            "Be content in my words, and dally not in the scholastic pursuits of lesser men.",
+            "No workplace shall be repurposed for slumber.",
+            "And I shall whisper to ye dutiful through the ages. In your noblest thoughts and epiphanies shall be my voice.",
+            "The light of discovery shines truer upon a virgin meadow than a beaten path.",
+            "Be ever merry.",
+            "The surest way to tame a prisoner is to let him believe he's free.",
+            "Tame in me the tempers four that I may serve thee evermore. Place in me the values nine that I may feel thy touch divine.",
+            "Endow in each swing of your ax or swipe of your pen the sum of your affections, that through me they may be purified and returned.",
+            "The remembered man does not decay.",
+            "Tame thy tempers."
+        ];
+
+        let currentQuoteIndex = Math.floor(Math.random() * quotes.length);
+        const quoteTextEl = document.getElementById('quote-text');
+        const prevButton = document.getElementById('prev-quote');
+        const nextButton = document.getElementById('next-quote');
+        const likeButton = document.getElementById('like-button');
+        
+        let votedQuotes = new Set(JSON.parse(localStorage.getItem('votedQuotes') || '[]'));
+        let db;
+
+        // --- Firebase Initialization ---
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            db = getFirestore(app);
+            await signInAnonymously(auth);
+        } catch(e) {
+            console.error("Firebase init failed:", e);
+            likeButton.disabled = true;
+            likeButton.textContent = "Connection Error";
+        }
+        
+        function displayQuote() {
+            quoteTextEl.textContent = `"${quotes[currentQuoteIndex]}"`;
+            updateLikeButton();
+        }
+
+        function updateLikeButton() {
+            if (votedQuotes.has(currentQuoteIndex)) {
+                likeButton.classList.add('voted');
+                likeButton.textContent = "Wisdom Approved";
+                likeButton.disabled = true;
+            } else {
+                likeButton.classList.remove('voted');
+                likeButton.textContent = "Approve of this Wisdom";
+                likeButton.disabled = false;
+            }
+        }
+
+        prevButton.addEventListener('click', () => {
+            currentQuoteIndex = (currentQuoteIndex - 1 + quotes.length) % quotes.length;
+            displayQuote();
+        });
+
+        nextButton.addEventListener('click', () => {
+            currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
+            displayQuote();
+        });
+
+        likeButton.addEventListener('click', async () => {
+            if (!db || votedQuotes.has(currentQuoteIndex)) return;
+            
+            likeButton.disabled = true;
+            const quoteId = `quote_${currentQuoteIndex}`;
+            const quoteRef = doc(db, "quoteVotes", quoteId);
+
+            try {
+                // Use a transaction to safely increment the vote count
+                const docSnap = await getDoc(quoteRef);
+                if (docSnap.exists()) {
+                    await setDoc(quoteRef, { votes: increment(1) }, { merge: true });
+                } else {
+                    await setDoc(quoteRef, { quote: quotes[currentQuoteIndex], votes: 1 });
+                }
+                
+                // Mark as voted locally
+                votedQuotes.add(currentQuoteIndex);
+                localStorage.setItem('votedQuotes', JSON.stringify([...votedQuotes]));
+                updateLikeButton();
+
+            } catch (error) {
+                console.error("Error writing document: ", error);
+                likeButton.disabled = false; // Re-enable on error
+            }
+        });
+
+        // Initial display
+        displayQuote();
+    </script>
+</body>
+</html>
