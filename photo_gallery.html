@@ -29,7 +29,6 @@
         <section class="lumon-card p-6 rounded-lg shadow-sm text-center">
             <h2 class="text-xl font-semibold text-yellow-800">Contribute to the Archive</h2>
             <p class="text-gray-500 mt-2 mb-4">Select an approved file (JPG, PNG, HEIC, MP4, MOV) to upload.</p>
-            <!-- EDITED: Added video types to the accept attribute -->
             <input type="file" id="fileInput" class="hidden" accept="image/jpeg,image/png,image/heic,image/heif,video/mp4,video/quicktime">
             <button id="uploadButton" class="upload-btn">Upload Media</button>
             <div id="uploadStatus" class="mt-4 text-sm text-gray-600"></div>
@@ -50,7 +49,9 @@
     </main>
 
     <script type="module">
+        // Using the confirmed relative path for the config file.
         import { firebaseConfig } from './firebase-config.js';
+        
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getStorage, ref, uploadBytes, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
@@ -86,13 +87,12 @@
                     const url = await getDownloadURL(itemRef);
                     const fileType = itemRef.name.toLowerCase();
                     
-                    // EDITED: Check if the file is a video or image and create the correct element
                     if (fileType.endsWith('.mp4') || fileType.endsWith('.mov')) {
                         const videoElement = document.createElement('video');
                         videoElement.src = url;
                         videoElement.className = "w-full h-auto object-cover rounded-lg shadow-md aspect-square";
                         videoElement.controls = true;
-                        videoElement.muted = true; // Important for autoplay policies
+                        videoElement.muted = true;
                         videoElement.playsInline = true;
                         gallery.appendChild(videoElement);
                     } else {
@@ -132,7 +132,6 @@
                     file = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
                 }
                 
-                // For videos, iOS often uses .mov which is video/quicktime
                 const isMov = file.type === 'video/quicktime' || file.name.toLowerCase().endsWith('.mov');
                 const fileName = isMov ? `${Date.now()}-converted.mp4` : `${Date.now()}-${file.name}`;
 
