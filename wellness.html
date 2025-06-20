@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumon - Wellness Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Sterile background */
+        }
+        .lumon-card {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb; /* Subtle border for definition */
+        }
+        .lumon-teal-text { color: #008080; }
+        .form-input {
+            width: 100%;
+            border-radius: 0.375rem;
+            border: 1px solid #d1d5db;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #0d9488; /* Tailwind's teal-600 */
+            box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2);
+        }
+        button:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="py-8 sm:py-12">
+
+    <!-- Main container for the single-column, centered layout -->
+    <main id="wellnessContainer" class="max-w-2xl mx-auto px-4 space-y-6">
+
+        <!-- Section 1: Session Start -->
+        <section id="questionnaire" class="lumon-card p-6 sm:p-8 rounded-lg shadow-sm">
+            <h1 class="text-center text-2xl font-bold lumon-teal-text">Your Wellness Session has Begun</h1>
+            <p class="text-center text-gray-600 mt-2">Please remain calm and answer truthfully. Your psychological hygiene is our priority.</p>
+            <hr class="my-6 border-gray-200">
+            <form id="wellnessForm">
+                <div id="questionContainer" class="space-y-6"></div>
+                <div class="pt-4 mt-6">
+                    <button id="submitButton" type="submit" class="w-full bg-teal-600 text-white font-bold py-3 px-4 rounded-md hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                        Submit for Analysis
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Section 2: Session End (Initially hidden) -->
+        <section id="completionMessage" class="hidden lumon-card p-6 sm:p-8 rounded-lg shadow-sm text-center">
+             <h1 class="text-2xl font-bold lumon-teal-text">The Session is Complete</h1>
+             <p class="text-gray-600 mt-4">Your responses have been cataloged and your emotional state has been quantified. The facts have been noted.</p>
+             <p class="text-gray-600 mt-2">You have demonstrated admirable psychological hygiene.</p>
+             <div class="mt-8">
+                <a href="intranet.html" class="text-teal-600 hover:text-teal-800 font-semibold">
+                    You may now return to your work. &rarr;
+                </a>
+             </div>
+        </section>
+        
+        <!-- Section 3: Error Message (Initially hidden) -->
+        <section id="errorMessage" class="hidden lumon-card p-6 sm:p-8 rounded-lg shadow-sm text-center bg-red-50">
+             <h1 class="text-xl font-bold text-red-700">Storage Anomaly Detected</h1>
+             <p class="text-red-600 mt-4">Your responses could not be cataloged due to a compliance error in the data pipeline.</p>
+             <p class="text-red-600 mt-2">Please try again later.</p>
+             <div class="mt-8">
+                <a href="intranet.html" class="text-red-600 hover:text-red-800 font-semibold">
+                    Return to Intranet &rarr;
+                </a>
+             </div>
+        </section>
+
+    </main>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // This special variable is provided by the environment.
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        let db;
+
+        try {
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            db = getFirestore(app);
+
+            // Sign in. Use the provided token if available, otherwise sign in anonymously.
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+        } catch(e) {
+            console.error("Firebase initialization failed: ", e);
+            // If Firebase fails to init, we can show a general error.
+            document.getElementById('questionnaire').classList.add('hidden');
+            document.getElementById('errorMessage').classList.remove('hidden');
+        }
+
+        const allQuestions = [
+            "Who are you?", "Please name five adjectives to describe your mother, if you can recall what a mother is.", "Imagine a fawn, deep in the woods. Now, list three things it might be thinking about.", "What is... regret?", "What is the shape of your soul, in terms of geometry?", "If you were a color, would you be a primary one?", "Describe a memory you've never had.", "What is the most efficient way to be happy?", "If you saw your outie, what is one question you would be permitted to ask them?", "Choose one: a key that opens no locks, or a lock that fits no key.", "How do you quantify loyalty?", "When you dream, are you a protagonist?", "What is a secret you would tell a machine?", "Please list three approved emotions you have experienced today."
+        ];
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        shuffleArray(allQuestions);
+        const selectedQuestions = allQuestions.slice(0, 4);
+        const questionContainer = document.getElementById('questionContainer');
+
+        selectedQuestions.forEach((questionText, index) => {
+            const questionId = `q${index}`;
+            const questionHtml = `
+                <div>
+                    <label for="${questionId}" class="block text-sm font-medium text-gray-700 mb-1">${questionText}</label>
+                    <input type="text" id="${questionId}" name="${questionId}" class="form-input" required>
+                </div>
+            `;
+            questionContainer.innerHTML += questionHtml;
+        });
+
+        const wellnessForm = document.getElementById('wellnessForm');
+        const questionnaireSection = document.getElementById('questionnaire');
+        const completionMessageSection = document.getElementById('completionMessage');
+        const errorMessageSection = document.getElementById('errorMessage');
+        const submitButton = document.getElementById('submitButton');
+
+        wellnessForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            submitButton.disabled = true;
+            submitButton.textContent = 'Analyzing...';
+
+            const submissionData = {
+                createdAt: serverTimestamp(),
+                responses: []
+            };
+
+            selectedQuestions.forEach((questionText, index) => {
+                const inputElement = document.getElementById(`q${index}`);
+                submissionData.responses.push({
+                    question: questionText,
+                    answer: inputElement.value
+                });
+            });
+
+            try {
+                // Save the data to Firestore
+                const docRef = await addDoc(collection(db, `/artifacts/${appId}/public/data/wellnessSubmissions`), submissionData);
+                console.log("Document written with ID: ", docRef.id);
+
+                // Show completion message on success
+                questionnaireSection.classList.add('hidden');
+                completionMessageSection.classList.remove('hidden');
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                // Show error message on failure
+                questionnaireSection.classList.add('hidden');
+                errorMessageSection.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
