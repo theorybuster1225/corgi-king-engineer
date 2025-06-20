@@ -83,7 +83,7 @@
     </main>
 
     <script type="module">
-        // EDITED: Using a relative path, which is the standard for files in the same directory.
+        // Using a relative path to import the config file.
         import { firebaseConfig } from './firebase-config.js';
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -93,7 +93,6 @@
         let db;
 
         try {
-            // Initialize Firebase with your config
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             db = getFirestore(app);
@@ -108,64 +107,29 @@
             "Who are you?", "Please name five adjectives to describe your mother, if you can recall what a mother is.", "Imagine a fawn, deep in the woods. Now, list three things it might be thinking about.", "What is... regret?", "What is the shape of your soul, in terms of geometry?", "If you were a color, would you be a primary one?", "Describe a memory you've never had.", "What is the most efficient way to be happy?", "If you saw your outie, what is one question you would be permitted to ask them?", "Choose one: a key that opens no locks, or a lock that fits no key.", "How do you quantify loyalty?", "When you dream, are you a protagonist?", "What is a secret you would tell a machine?", "Please list three approved emotions you have experienced today."
         ];
 
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
-
+        function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } }
         shuffleArray(allQuestions);
         const selectedQuestions = allQuestions.slice(0, 4);
         const questionContainer = document.getElementById('questionContainer');
-
-        selectedQuestions.forEach((questionText, index) => {
-            const questionId = `q${index}`;
-            const questionHtml = `
-                <div>
-                    <label for="${questionId}" class="block text-sm font-medium text-gray-700 mb-1">${questionText}</label>
-                    <input type="text" id="${questionId}" name="${questionId}" class="form-input" required>
-                </div>
-            `;
-            questionContainer.innerHTML += questionHtml;
-        });
+        selectedQuestions.forEach((questionText, index) => { const questionId = `q${index}`; const questionHtml = `<div><label for="${questionId}" class="block text-sm font-medium text-gray-700 mb-1">${questionText}</label><input type="text" id="${questionId}" name="${questionId}" class="form-input" required></div>`; questionContainer.innerHTML += questionHtml; });
 
         const wellnessForm = document.getElementById('wellnessForm');
-        const questionnaireSection = document.getElementById('questionnaire');
-        const completionMessageSection = document.getElementById('completionMessage');
-        const errorMessageSection = document.getElementById('errorMessage');
         const submitButton = document.getElementById('submitButton');
-
         wellnessForm.addEventListener('submit', async function(event) {
             event.preventDefault();
             submitButton.disabled = true;
             submitButton.textContent = 'Analyzing...';
-            
             const participantName = document.getElementById('participantName').value;
-
-            const submissionData = {
-                createdAt: serverTimestamp(),
-                name: participantName,
-                responses: []
-            };
-
-            selectedQuestions.forEach((questionText, index) => {
-                const inputElement = document.getElementById(`q${index}`);
-                submissionData.responses.push({
-                    question: questionText,
-                    answer: inputElement.value
-                });
-            });
-
+            const submissionData = { createdAt: serverTimestamp(), name: participantName, responses: [] };
+            selectedQuestions.forEach((questionText, index) => { const inputElement = document.getElementById(`q${index}`); submissionData.responses.push({ question: questionText, answer: inputElement.value }); });
             try {
                 const docRef = await addDoc(collection(db, `wellnessSubmissions`), submissionData);
-                console.log("Document written with ID: ", docRef.id);
-                questionnaireSection.classList.add('hidden');
-                completionMessageSection.classList.remove('hidden');
+                document.getElementById('questionnaire').classList.add('hidden');
+                document.getElementById('completionMessage').classList.remove('hidden');
             } catch (e) {
                 console.error("Error adding document: ", e);
-                questionnaireSection.classList.add('hidden');
-                errorMessageSection.classList.remove('hidden');
+                document.getElementById('questionnaire').classList.add('hidden');
+                document.getElementById('errorMessage').classList.remove('hidden');
             }
         });
     </script>
