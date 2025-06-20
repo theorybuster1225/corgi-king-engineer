@@ -9,11 +9,11 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8; /* Sterile background */
+            background-color: #f0f4f8;
         }
         .lumon-card {
             background-color: #ffffff;
-            border: 1px solid #e5e7eb; /* Subtle border for definition */
+            border: 1px solid #e5e7eb;
         }
         .lumon-teal-text { color: #008080; }
         .form-input {
@@ -26,7 +26,7 @@
         }
         .form-input:focus {
             outline: none;
-            border-color: #0d9488; /* Tailwind's teal-600 */
+            border-color: #0d9488;
             box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2);
         }
         button:disabled {
@@ -37,16 +37,13 @@
 </head>
 <body class="py-8 sm:py-12">
 
-    <!-- Main container for the single-column, centered layout -->
     <main id="wellnessContainer" class="max-w-2xl mx-auto px-4 space-y-6">
 
-        <!-- Section 1: Session Start -->
         <section id="questionnaire" class="lumon-card p-6 sm:p-8 rounded-lg shadow-sm">
             <h1 class="text-center text-2xl font-bold lumon-teal-text">Your Wellness Session has Begun</h1>
             <p class="text-center text-gray-600 mt-2">Please remain calm and answer truthfully. Your psychological hygiene is our priority.</p>
             <hr class="my-6 border-gray-200">
             <form id="wellnessForm">
-                <!-- EDITED: Added a Name input field -->
                 <div class="space-y-6">
                     <div>
                         <label for="participantName" class="block text-sm font-medium text-gray-700 mb-1">Your Designation (Name)</label>
@@ -63,11 +60,9 @@
             </form>
         </section>
 
-        <!-- Section 2: Session End (Initially hidden) -->
         <section id="completionMessage" class="hidden lumon-card p-6 sm:p-8 rounded-lg shadow-sm text-center">
              <h1 class="text-2xl font-bold lumon-teal-text">The Session is Complete</h1>
-             <p class="text-gray-600 mt-4">Your responses have been cataloged and your emotional state has been quantified. The facts have been noted.</p>
-             <p class="text-gray-600 mt-2">You have demonstrated admirable psychological hygiene.</p>
+             <p class="text-gray-600 mt-4">Your responses have been cataloged and your emotional state has been quantified.</p>
              <div class="mt-8">
                 <a href="intranet.html" class="text-teal-600 hover:text-teal-800 font-semibold">
                     You may now return to your work. &rarr;
@@ -75,11 +70,9 @@
              </div>
         </section>
         
-        <!-- Section 3: Error Message (Initially hidden) -->
         <section id="errorMessage" class="hidden lumon-card p-6 sm:p-8 rounded-lg shadow-sm text-center bg-red-50">
              <h1 class="text-xl font-bold text-red-700">Storage Anomaly Detected</h1>
-             <p class="text-red-600 mt-4">Your responses could not be cataloged due to a compliance error in the data pipeline.</p>
-             <p class="text-red-600 mt-2">Please try again later.</p>
+             <p class="text-red-600 mt-4">Your responses could not be cataloged. Please verify the page configuration.</p>
              <div class="mt-8">
                 <a href="intranet.html" class="text-red-600 hover:text-red-800 font-semibold">
                     Return to Intranet &rarr;
@@ -89,27 +82,26 @@
 
     </main>
 
+    <!-- EDITED SCRIPT SECTION -->
     <script type="module">
-        // Import the functions you need from the SDKs you need
+        // Import the new, local firebase config
+        import { firebaseConfig } from './firebase-config.js';
+
+        // Import the functions you need from the Firebase SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         let db;
 
         try {
+            // Initialize Firebase with your config
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             db = getFirestore(app);
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
-            }
+            await signInAnonymously(auth);
         } catch(e) {
-            console.error("Firebase initialization failed: ", e);
+            console.error("Firebase initialization failed. Make sure 'firebase-config.js' is set up correctly.", e);
             document.getElementById('questionnaire').classList.add('hidden');
             document.getElementById('errorMessage').classList.remove('hidden');
         }
@@ -151,12 +143,11 @@
             submitButton.disabled = true;
             submitButton.textContent = 'Analyzing...';
             
-            // EDITED: Get the name from the new input field
             const participantName = document.getElementById('participantName').value;
 
             const submissionData = {
                 createdAt: serverTimestamp(),
-                name: participantName, // EDITED: Add name to the submission
+                name: participantName,
                 responses: []
             };
 
@@ -169,7 +160,8 @@
             });
 
             try {
-                const docRef = await addDoc(collection(db, `/artifacts/${appId}/public/data/wellnessSubmissions`), submissionData);
+                // The public path is now hardcoded for simplicity
+                const docRef = await addDoc(collection(db, `wellnessSubmissions`), submissionData);
                 console.log("Document written with ID: ", docRef.id);
                 questionnaireSection.classList.add('hidden');
                 completionMessageSection.classList.remove('hidden');
