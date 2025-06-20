@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumon - Event Documentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; }
+        .lumon-card { background-color: #ffffff; border: 1px solid #e5e7eb; }
+        .upload-btn { background-color: #fbbf24; color: #78350f; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.5rem; cursor: pointer; transition: background-color 0.2s; }
+        .upload-btn:hover { background-color: #f59e0b; }
+        .upload-btn:disabled { background-color: #9ca3af; color: #e5e7eb; cursor: not-allowed; }
+        .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: #0d9488; animation: spin 1s ease infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="py-8 sm:py-12">
+
+    <main class="max-w-6xl mx-auto px-4 space-y-6">
+
+        <section class="lumon-card p-6 sm:p-8 rounded-lg shadow-sm text-center">
+            <h1 class="text-2xl font-bold text-gray-800">Event Documentation Archive</h1>
+            <p class="text-gray-600 mt-2">All visual records of the Waffle Party have been compiled for review.</p>
+        </section>
+
+        <section class="lumon-card p-6 rounded-lg shadow-sm text-center">
+            <h2 class="text-xl font-semibold text-yellow-800">Contribute to the Archive</h2>
+            <p class="text-gray-500 mt-2 mb-4">Select an approved file (JPG, PNG, HEIC, MP4, MOV) to upload.</p>
+            <!-- EDITED: Added video types to the accept attribute -->
+            <input type="file" id="fileInput" class="hidden" accept="image/jpeg,image/png,image/heic,image/heif,video/mp4,video/quicktime">
+            <button id="uploadButton" class="upload-btn">Upload Media</button>
+            <div id="uploadStatus" class="mt-4 text-sm text-gray-600"></div>
+        </section>
+
+        <section id="gallery" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <!-- Media will be inserted here by JavaScript -->
+        </section>
+
+        <div id="loadingIndicator" class="flex justify-center py-8">
+            <div class="spinner"></div>
+        </div>
+        
+        <div class="text-center pt-4">
+             <a href="intranet.html" class="text-gray-500 hover:text-gray-800 font-semibold text-sm">Return to Intranet</a>
+        </div>
+
+    </main>
+
+    <script type="module">
+        import { firebaseConfig } from './firebase-config.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getStorage, ref, uploadBytes, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+        const fileInput = document.getElementById('fileInput');
+        const uploadButton = document.getElementById('uploadButton');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const gallery = document.getElementById('gallery');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        let storage;
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            storage = getStorage(app);
+            await signInAnonymously(auth);
+            loadMedia();
+        } catch(e) {
+            console.error("Firebase init failed:", e);
+            uploadStatus.textContent = "Error: Could not connect to the archive.";
+            uploadButton.disabled = true;
+            loadingIndicator.classList.add('hidden');
+        }
+
+        async function loadMedia() {
+            gallery.innerHTML = '';
+            loadingIndicator.classList.remove('hidden');
+            const listRef = ref(storage, 'images');
+            try {
+                const res = await listAll(listRef);
+                const sortedItems = res.items.sort((a, b) => a.name.localeCompare(b.name));
+                for (const itemRef of sortedItems) {
+                    const url = await getDownloadURL(itemRef);
+                    const fileType = itemRef.name.toLowerCase();
+                    
+                    // EDITED: Check if the file is a video or image and create the correct element
+                    if (fileType.endsWith('.mp4') || fileType.endsWith('.mov')) {
+                        const videoElement = document.createElement('video');
+                        videoElement.src = url;
+                        videoElement.className = "w-full h-auto object-cover rounded-lg shadow-md aspect-square";
+                        videoElement.controls = true;
+                        videoElement.muted = true; // Important for autoplay policies
+                        videoElement.playsInline = true;
+                        gallery.appendChild(videoElement);
+                    } else {
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.target = '_blank';
+                        const imgElement = document.createElement('img');
+                        imgElement.src = url;
+                        imgElement.className = "w-full h-auto object-cover rounded-lg shadow-md aspect-square cursor-pointer";
+                        imgElement.loading = "lazy";
+                        a.appendChild(imgElement);
+                        gallery.appendChild(a);
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading media:", error);
+                uploadStatus.textContent = 'Could not load media from the archive.';
+            } finally {
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+
+        uploadButton.addEventListener('click', () => { fileInput.click(); });
+
+        fileInput.addEventListener('change', async (e) => {
+            let file = e.target.files[0];
+            if (!file) return;
+
+            uploadButton.disabled = true;
+            uploadStatus.textContent = 'Processing file...';
+
+            try {
+                const isHeic = file.type === 'image/heic' || file.type === 'image/heif' || file.name.toLowerCase().endsWith('.heic');
+                if (isHeic) {
+                    uploadStatus.textContent = 'Converting HEIC to JPG...';
+                    const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.8 });
+                    file = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+                }
+                
+                // For videos, iOS often uses .mov which is video/quicktime
+                const isMov = file.type === 'video/quicktime' || file.name.toLowerCase().endsWith('.mov');
+                const fileName = isMov ? `${Date.now()}-converted.mp4` : `${Date.now()}-${file.name}`;
+
+                uploadStatus.textContent = 'Uploading...';
+                const storageRef = ref(storage, `images/${fileName}`);
+                
+                const snapshot = await uploadBytes(storageRef, file);
+                console.log('Uploaded a file!', snapshot);
+                
+                uploadStatus.textContent = 'Upload complete! Refreshing gallery...';
+                await loadMedia();
+                uploadStatus.textContent = '';
+
+            } catch (error) {
+                console.error("Upload failed", error);
+                uploadStatus.textContent = 'Upload failed. The file may be too large or not an accepted format.';
+            } finally {
+                uploadButton.disabled = false;
+                fileInput.value = '';
+            }
+        });
+    </script>
+</body>
+</html>
