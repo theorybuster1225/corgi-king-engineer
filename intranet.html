@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lumon Intranet</title>
-    <script src="https://cdn.tailwindcss.com/tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -21,21 +21,29 @@
 </head>
 <body class="py-8 sm:py-12">
 
+    <!-- Main container for the single-column, centered layout -->
     <main class="max-w-2xl mx-auto px-4 space-y-6">
 
+        <!-- 
+          Section 1: Banner - EDITED 
+          The image is now placed *inside* a padded card. This padding
+          will constrain the image, aligning it with the other sections.
+        -->
         <section class="lumon-card p-4 rounded-lg shadow-sm">
             <img 
               src="lumon_banner.jpg" 
               alt="Lumon Industries Banner" 
-              class="w-full h-auto"
+              class="w-full h-auto rounded-md"
             >
         </section>
 
+        <!-- Section 2: Welcome Message -->
         <section class="lumon-card p-6 rounded-lg shadow-sm">
             <h1 class="text-2xl font-bold text-gray-900">Greetings, Refiner.</h1>
             <p class="mt-2 text-gray-600">Your continued productivity is noted and appreciated. Please attend to your directives for the current work cycle.</p>
         </section>
 
+        <!-- Section 3: Employee Directives (Hyperlinks) -->
         <section class="lumon-card p-6 rounded-lg shadow-sm">
             <h2 class="text-xl font-semibold lumon-blue-text border-b border-gray-200 pb-3 mb-4">Employee Directives</h2>
             <div class="space-y-4">
@@ -54,6 +62,7 @@
             </div>
         </section>
         
+        <!-- Section 4: Founder's Corner (Kier Portrait) -->
         <section class="lumon-card p-6 rounded-lg shadow-sm text-center">
             <img src="kier_portrait.jpg" alt="Our Founder, Kier Eagan" class="w-20 h-20 mx-auto rounded-full grayscale object-cover">
             <h3 class="mt-4 font-semibold text-lg text-gray-800">A Word from the Founder</h3>
@@ -63,6 +72,7 @@
             <p class="mt-3 text-xs text-gray-400">- Kier Eagan</p>
         </section>
 
+        <!-- Section 5: Compliance Status -->
         <section class="lumon-card p-6 rounded-lg shadow-sm">
             <h3 class="font-semibold text-lg text-gray-800">Compliance Status</h3>
             <div class="w-full bg-gray-200 rounded-full h-2.5 mt-3">
@@ -73,6 +83,7 @@
 
     </main>
 
+    <!-- Footer -->
     <footer class="max-w-2xl mx-auto text-center py-6 px-4">
         <p class="text-xs text-gray-500">&copy; <span id="currentYear"></span> Lumon Industries. All actions are monitored.</p>
     </footer>
