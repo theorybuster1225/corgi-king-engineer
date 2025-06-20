@@ -4,7 +4,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyAz-lhtB_fUdWi8TTR_CSeqmXNa8Mw7JM8",
   authDomain: "wellnesssession-8e0c9.firebaseapp.com",
   projectId: "wellnesssession-8e0c9",
-  storageBucket: "wellnesssession-8e0c9.firebasestorage.app",
+  storageBucket: "wellnesssession-8e0c9.appspot.com",
   messagingSenderId: "1086505868867",
   appId: "1:1086505868867:web:ebb46017e744a67db57ef6",
   measurementId: "G-SMTEQ4JB5T"
