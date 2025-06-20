@@ -7,52 +7,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* Ensures the layout takes up the full screen height */
-        html, body {
-            height: 100%;
-            overflow: hidden;
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #111827; /* Dark background for a presentation */
-            color: #f3f4f6;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        .slide-container {
-            width: 90%;
-            max-width: 1000px;
-            text-align: center;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-        .slide-container.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .nav-button {
-            background-color: #374151;
-            padding: 0.75rem 2rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            transition: background-color 0.2s;
-        }
-        .nav-button:hover {
-            background-color: #4b5563;
-        }
-        .nav-button:disabled {
-            background-color: #1f2937;
-            color: #4b5563;
-            cursor: not-allowed;
-        }
+        html, body { height: 100%; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; background-color: #111827; color: #f3f4f6; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .slide-container { width: 90%; max-width: 1000px; text-align: center; opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; }
+        .slide-container.visible { opacity: 1; transform: translateY(0); }
+        .nav-button { background-color: #374151; padding: 0.75rem 2rem; border-radius: 0.5rem; font-weight: 600; transition: background-color 0.2s; }
+        .nav-button:hover { background-color: #4b5563; }
+        .nav-button:disabled { background-color: #1f2937; color: #4b5563; cursor: not-allowed; }
     </style>
 </head>
 <body>
-
-    <!-- EDITED: New Intro Slide -->
     <div id="introSlide" class="text-center p-4">
         <h1 class="text-3xl font-bold text-teal-400">Wellness Data Synthesis</h1>
         <p class="text-gray-300 mt-4 max-w-xl">Thank you for your compliance. Your emotional input has been processed to foster departmental harmony.</p>
@@ -61,34 +25,28 @@
             <button id="beginButton" class="nav-button text-lg" disabled>Compiling Data...</button>
         </div>
     </div>
-
     <div id="slideshow" class="hidden h-full w-full flex flex-col justify-center items-center p-4">
-        <!-- Main slide display area -->
         <div id="slideContainer" class="slide-container flex-grow flex flex-col justify-center">
             <p id="slideQuestion" class="text-xl sm:text-2xl md:text-3xl text-gray-400 mb-4"></p>
             <p id="slideAnswer" class="text-3xl sm:text-4xl md:text-5xl font-bold mb-8"></p>
             <p id="slideParticipant" class="text-xl sm:text-2xl md:text-3xl text-teal-400"></p>
         </div>
-
-        <!-- Navigation controls -->
         <footer class="w-full flex justify-between items-center max-w-2xl p-4">
             <button id="prevButton" class="nav-button">&larr; Previous</button>
             <div id="slideCounter" class="text-lg text-gray-400"></div>
             <button id="nextButton" class="nav-button">Next &rarr;</button>
         </footer>
     </div>
-    
     <div id="errorState" class="hidden text-center">
         <h1 class="text-2xl font-semibold text-red-500">Data Retrieval Failure</h1>
-        <p class="text-gray-400 mt-2">Could not connect to the wellness archive. Check console for details.</p>
+        <p class="text-gray-400 mt-2">Could not connect to the wellness archive. Verify page configuration.</p>
     </div>
-
     <script type="module">
+        import { firebaseConfig } from './firebase-config.js';
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- UI Elements ---
         const introSlide = document.getElementById('introSlide');
         const beginButton = document.getElementById('beginButton');
         const slideshowDiv = document.getElementById('slideshow');
@@ -100,147 +58,78 @@
         const prevButton = document.getElementById('prevButton');
         const nextButton = document.getElementById('nextButton');
         const slideCounter = document.getElementById('slideCounter');
-
         let allSlides = [];
         let currentSlideIndex = 0;
-
-        // --- Firebase Initialization ---
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         let db;
-
         async function initializeAndFetch() {
             try {
                 const app = initializeApp(firebaseConfig);
                 const auth = getAuth(app);
                 db = getFirestore(app);
-
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                
+                await signInAnonymously(auth);
                 await fetchAndProcessData();
-
             } catch(e) {
-                console.error("Firebase initialization failed: ", e);
+                console.error("Firebase initialization failed:", e);
                 introSlide.classList.add('hidden');
                 errorState.classList.remove('hidden');
             }
         }
-
-        // --- Data Processing and Slideshow Logic ---
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
-
+        function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[array[i], array[j]] = [array[j], array[i]]; } }
         async function fetchAndProcessData() {
             try {
-                const querySnapshot = await getDocs(collection(db, `/artifacts/${appId}/public/data/wellnessSubmissions`));
+                const querySnapshot = await getDocs(collection(db, `wellnessSubmissions`));
                 let processedResponses = [];
-
                 querySnapshot.forEach(doc => {
                     const data = doc.data();
-                    if (data.name && data.responses && data.responses.length > 0) {
+                    if (data.name && data.responses) {
                         shuffleArray(data.responses);
-                        const selectedForParticipant = data.responses.slice(0, 2);
-                        
-                        selectedForParticipant.forEach(response => {
-                             if (response.answer) {
-                                processedResponses.push({
-                                    name: data.name,
-                                    question: response.question,
-                                    answer: response.answer
-                                });
-                            }
-                        });
+                        const selected = data.responses.slice(0, 2);
+                        selected.forEach(res => { if (res.answer) { processedResponses.push({ name: data.name, question: res.question, answer: res.answer }); } });
                     }
                 });
-
                 shuffleArray(processedResponses);
                 allSlides = processedResponses;
-
                 if (allSlides.length > 0) {
-                    // EDITED: Enable the begin button when data is ready
                     beginButton.disabled = false;
                     beginButton.textContent = 'Begin Analysis';
                 } else {
                      beginButton.textContent = 'No Data Found';
-                     // Optional: style the button differently if no data
                      beginButton.classList.add('bg-yellow-700', 'text-white');
                 }
-
             } catch (e) {
                 console.error("Error fetching documents: ", e);
                 introSlide.classList.add('hidden');
                 errorState.classList.remove('hidden');
             }
         }
-
         function startSlideshow() {
             introSlide.classList.add('hidden');
             slideshowDiv.classList.remove('hidden');
             displaySlide(currentSlideIndex);
         }
-        
         function displaySlide(index) {
             if (index < 0 || index >= allSlides.length) return;
-
             const slideData = allSlides[index];
             slideContainer.classList.remove('visible');
-            
             setTimeout(() => {
                 slideQuestion.textContent = slideData.question;
                 slideAnswer.textContent = `"${slideData.answer}"`;
                 slideParticipant.textContent = `— ${slideData.name}`;
                 slideCounter.textContent = `${index + 1} / ${allSlides.length}`;
-                
                 prevButton.disabled = index === 0;
                 nextButton.disabled = index === allSlides.length - 1;
-                
                 slideContainer.classList.add('visible');
             }, 300);
         }
-
-        // --- Event Listeners ---
-        beginButton.addEventListener('click', () => {
-            if (allSlides.length > 0) {
-                startSlideshow();
-            }
-        });
-
-        nextButton.addEventListener('click', () => {
-            if (currentSlideIndex < allSlides.length - 1) {
-                currentSlideIndex++;
-                displaySlide(currentSlideIndex);
-            }
-        });
-
-        prevButton.addEventListener('click', () => {
-            if (currentSlideIndex > 0) {
-                currentSlideIndex--;
-                displaySlide(currentSlideIndex);
-            }
-        });
-
+        beginButton.addEventListener('click', () => { if (allSlides.length > 0) startSlideshow(); });
+        nextButton.addEventListener('click', () => { if (currentSlideIndex < allSlides.length - 1) displaySlide(++currentSlideIndex); });
+        prevButton.addEventListener('click', () => { if (currentSlideIndex > 0) displaySlide(--currentSlideIndex); });
         document.addEventListener('keydown', (e) => {
-            // EDITED: Only allow keyboard nav if the slideshow is active
             if (slideshowDiv.classList.contains('hidden')) return;
-
-            if (e.key === 'ArrowRight') {
-                nextButton.click();
-            } else if (e.key === 'ArrowLeft') {
-                prevButton.click();
-            }
+            if (e.key === 'ArrowRight') nextButton.click();
+            else if (e.key === 'ArrowLeft') prevButton.click();
         });
-
-        // --- Start the process ---
         initializeAndFetch();
-
     </script>
 </body>
 </html>
