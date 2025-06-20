@@ -46,6 +46,14 @@
             <p class="text-center text-gray-600 mt-2">Please remain calm and answer truthfully. Your psychological hygiene is our priority.</p>
             <hr class="my-6 border-gray-200">
             <form id="wellnessForm">
+                <!-- EDITED: Added a Name input field -->
+                <div class="space-y-6">
+                    <div>
+                        <label for="participantName" class="block text-sm font-medium text-gray-700 mb-1">Your Designation (Name)</label>
+                        <input type="text" id="participantName" name="participantName" class="form-input" placeholder="e.g., Mark S." required>
+                    </div>
+                </div>
+                <hr class="my-6 border-gray-200">
                 <div id="questionContainer" class="space-y-6"></div>
                 <div class="pt-4 mt-6">
                     <button id="submitButton" type="submit" class="w-full bg-teal-600 text-white font-bold py-3 px-4 rounded-md hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
@@ -87,19 +95,14 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // This special variable is provided by the environment.
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
         let db;
 
         try {
-            // Initialize Firebase
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             db = getFirestore(app);
-
-            // Sign in. Use the provided token if available, otherwise sign in anonymously.
             if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                 await signInWithCustomToken(auth, __initial_auth_token);
             } else {
@@ -107,7 +110,6 @@
             }
         } catch(e) {
             console.error("Firebase initialization failed: ", e);
-            // If Firebase fails to init, we can show a general error.
             document.getElementById('questionnaire').classList.add('hidden');
             document.getElementById('errorMessage').classList.remove('hidden');
         }
@@ -148,9 +150,13 @@
             event.preventDefault();
             submitButton.disabled = true;
             submitButton.textContent = 'Analyzing...';
+            
+            // EDITED: Get the name from the new input field
+            const participantName = document.getElementById('participantName').value;
 
             const submissionData = {
                 createdAt: serverTimestamp(),
+                name: participantName, // EDITED: Add name to the submission
                 responses: []
             };
 
@@ -163,16 +169,12 @@
             });
 
             try {
-                // Save the data to Firestore
                 const docRef = await addDoc(collection(db, `/artifacts/${appId}/public/data/wellnessSubmissions`), submissionData);
                 console.log("Document written with ID: ", docRef.id);
-
-                // Show completion message on success
                 questionnaireSection.classList.add('hidden');
                 completionMessageSection.classList.remove('hidden');
             } catch (e) {
                 console.error("Error adding document: ", e);
-                // Show error message on failure
                 questionnaireSection.classList.add('hidden');
                 errorMessageSection.classList.remove('hidden');
             }
