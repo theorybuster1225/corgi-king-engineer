@@ -34,7 +34,7 @@
 
         <!-- Section 2: Welcome Message -->
         <section class="lumon-card p-6 rounded-lg shadow-sm">
-            <h1 class="text-2xl font-bold text-gray-900">Greetings, </h1>
+            <h1 class="text-2xl font-bold text-gray-900">Greetings, Refiner.</h1>
             <p class="mt-2 text-gray-600">Your continued productivity is noted and appreciated. Please attend to your directives for the current work cycle.</p>
         </section>
 
@@ -50,16 +50,16 @@
                     <p class="font-semibold text-gray-700">Review Employee Handbook</p>
                     <p class="text-sm text-gray-500">Ensure your work habits are in full compliance.</p>
                 </a>
-                 <a href="photo_gallery.html" class="block bg-yellow-50 hover:bg-yellow-100 p-4 rounded-md transition-colors">
-                    <p class="font-semibold text-yellow-800">Review Event Documentation</p>
-                    <p class="text-sm text-gray-500">A record of the recent Waffle Party is available for viewing.</p>
+                 <!-- EDITED: This now points to your shared album URL -->
+                 <a href="https://app.kululu.com/3t6be5" target="_blank" class="block bg-yellow-50 hover:bg-yellow-100 p-4 rounded-md transition-colors">
+                    <p class="font-semibold text-yellow-800">Contribute to Event Documentation</p>
+                    <p class="text-sm text-gray-500">Upload and view all photos and videos from the Waffle Party.</p>
                 </a>
             </div>
         </section>
         
         <!-- Section 4: Founder's Corner (Kier Portrait) -->
         <section class="lumon-card p-6 rounded-lg shadow-sm text-center">
-            <!-- EDITED: Changed w-20 h-20 to w-40 h-40 to double the size -->
             <img src="kier_portrait.jpg" alt="Our Founder, Kier Eagan" class="w-40 h-40 mx-auto rounded-full grayscale object-cover">
             <h3 class="mt-4 font-semibold text-lg text-gray-800">A Word from the Founder</h3>
             <blockquote class="mt-2 text-sm text-gray-600 italic">
@@ -81,11 +81,8 @@
 
     <!-- Footer -->
     <footer class="max-w-2xl mx-auto text-center py-6 px-4">
-        <p class="text-xs text-gray-500">&copy; <span id="currentYear"></span> Lumon Industries. All actions are monitored.</p>
+        <p class="text-xs text-gray-500">&copy; <span id="currentYear">2025</span> Lumon Industries. All actions are monitored.</p>
     </footer>
 
-    <script>
-        document.getElementById('currentYear').textContent = new Date().getFullYear();
-    </script>
 </body>
 </html>
